@@ -104,6 +104,46 @@ describe("Q2", function () {
     });
   });
 
+  describe('burn token', async function () {
+
+    let deployedTransferController;
+    let owner;
+    let addr1;
+
+    beforeEach(async function () {
+      [owner, addr1] = await ethers.getSigners();
+      const TransferController = await ethers.getContractFactory("TransferController");
+      deployedTransferController = await TransferController.deploy();
+      await deployedQ2Token.changeControllerAddress(deployedTransferController.address);
+    })
+
+    it('Burning token from zero address', async function () {
+      await expect(
+        deployedQ2Token._burn("0x0000000000000000000000000000000000000000", 10000)
+      ).to.be.revertedWith("ERC20: burn from the zero address");
+    });
+
+    it('Burning token from other address', async function () {
+      await expect(
+        deployedQ2Token._burn(addr1.address, 10000)
+      ).to.be.revertedWith("ERC20: burn from other account");
+    });
+
+    it('Cannot burn token more than balance', async function () {
+      await expect(
+        deployedQ2Token._burn(addr1.address, 10000)
+      ).to.be.revertedWith("ERC20: burn from other account");
+    });
+
+
+
+    it('Burning token decreases supply and balance', async function () {
+      await deployedQ2Token._burn(owner.address, '1000000000000000000');
+      expect(Number(await deployedQ2Token.balanceOf(owner.address)).toLocaleString('fullwide', { useGrouping: false })).to.equal('14999999999000000000000000000');
+      expect(Number(await deployedQ2Token.totalSupply()).toLocaleString('fullwide', { useGrouping: false })).to.equal('14999999999000000000000000000');
+    });
+  });
+
   describe('give allowance and tranfers token from account', async function () {
 
     let deployedTransferController;
@@ -130,7 +170,7 @@ describe("Q2", function () {
       ).to.be.revertedWith("transfer amount exceeds allowance");
     });
 
-    it('can send tokens to any address if everyone accept is on', async function () {
+    it('send tokens to any address and decreases allowance if everyone accept is on', async function () {
 
       await deployedQ2Token.changeEveryoneAccept(true);
       expect(await deployedQ2Token.balanceOf(addr1.address)).to.equal(0);
@@ -144,7 +184,7 @@ describe("Q2", function () {
       expect(Number(await deployedQ2Token.balanceOf(owner.address)).toLocaleString('fullwide', { useGrouping: false })).to.equal('14999999999000000000000000000');
     });
 
-    it('can send tokens to whitelisted address', async function () {
+    it('can send tokens to whitelisted address and decreases allowance when everyone accept is off', async function () {
 
       await deployedTransferController.addAddressToWhiteList(addr1.address, true);
       expect(await deployedQ2Token.balanceOf(addr1.address)).to.equal(0);
