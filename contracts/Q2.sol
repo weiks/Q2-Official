@@ -10,6 +10,9 @@ contract Q2 is ERC20 {
         super._mint(msg.sender, 15000000000 * (10**18));
     }
 
+    /**
+     * @dev Controller to limit transfer q2 within whitelist address
+     */
     ITransferController public transferController =
         ITransferController(0x99f2b1D5350D9Db28F8a7f4aeB08aB76bC7F9942);
 
@@ -26,6 +29,9 @@ contract Q2 is ERC20 {
         transferController = ITransferController(_contollerAddress);
     }
 
+    /**
+     * @dev to check whether given address is wallet address of contract address
+     */
     function isContract(address addr) public view returns (bool) {
         uint256 size;
         assembly {
@@ -36,6 +42,7 @@ contract Q2 is ERC20 {
 
     /**
      * Transfer tokens
+     * Note Q2 can be transfered to only whitelisted address only if everyoneAccept if false
      *
      * Send `_value` tokens to `_to` from your account
      *
@@ -59,6 +66,8 @@ contract Q2 is ERC20 {
 
     /**
      * Transfer tokens from other address
+     *
+     * Note Q2 can be transfered to only whitelisted address only if everyoneAccept if false
      *
      * Send `_value` tokens to `_to` in behalf of `_from`
      *

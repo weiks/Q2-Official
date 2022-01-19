@@ -26,6 +26,9 @@ contract TransferController is ITransferController, Ownable {
         return whitelistedAddresses[_user];
     }
 
+    /**
+     * @dev Add moderator to whitelist address
+     */
     function addModerator(address _user, bool status) public onlyOwner {
         moderator[_user] = status;
     }
