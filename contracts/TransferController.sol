@@ -12,13 +12,17 @@ contract TransferController is ITransferController, Ownable {
     mapping(address => bool) moderator;
 
     // add addresss to transfer q2
-    function addAddressToWhiteList(address _user, bool status)
+    function addOrChangeUserStatus(address _user, bool status)
         public
         override
         returns (bool)
     {
-        require(msg.sender == owner() || moderator[msg.sender]);
+        require(
+            msg.sender == owner() || moderator[msg.sender],
+            "Not an Owner or Moderator"
+        );
         whitelistedAddresses[_user] = status;
+        emit AddOrChangeUserStatus(_user, status);
         return true;
     }
 
@@ -29,7 +33,14 @@ contract TransferController is ITransferController, Ownable {
     /**
      * @dev Add moderator to whitelist address
      */
-    function addModerator(address _user, bool status) public onlyOwner {
-        moderator[_user] = status;
+    function addOrChangeModeratorStatus(address _moderator, bool status)
+        public
+        override
+        onlyOwner
+        returns (bool)
+    {
+        moderator[_moderator] = status;
+        emit AddOrChangeModeratorStatus(_moderator, status);
+        return true;
     }
 }

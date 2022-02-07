@@ -32,20 +32,21 @@ describe("Q2", function () {
     expect(await deployedQ2Token.transferController()).to.equal('0x99f2b1D5350D9Db28F8a7f4aeB08aB76bC7F9942');
     const TransferController = await ethers.getContractFactory("TransferController");
     const deployedTransferController = await TransferController.deploy();
-    await deployedQ2Token.changeControllerAddress(deployedTransferController.address);
+    await expect(deployedQ2Token.changeControllerAddress(deployedTransferController.address)).to.emit(deployedQ2Token, 'ChangeControllerAddress').withArgs('0x99f2b1D5350D9Db28F8a7f4aeB08aB76bC7F9942', deployedTransferController.address);
     expect(await deployedQ2Token.transferController()).to.equal(deployedTransferController.address);
   });
 
   it('can change everyoneaccept', async function () {
     expect(await deployedQ2Token.everyoneAccept()).to.equal(false);
     await deployedQ2Token.changeEveryoneAccept(true);
+    await expect(deployedQ2Token.changeEveryoneAccept(true)).to.emit(deployedQ2Token, 'ChangeEveryoneAccept').withArgs(true);
     expect(await deployedQ2Token.everyoneAccept()).to.equal(true);
   });
 
   it('can tranfer Ownership', async function () {
     const [owner, addr1] = await ethers.getSigners();
     expect(await deployedQ2Token.owner()).to.equal(owner.address);
-    await deployedQ2Token.transferOwnership(addr1.address);
+    await expect(deployedQ2Token.transferOwnership(addr1.address)).to.emit(deployedQ2Token, 'OwnershipTransferred').withArgs(owner.address, addr1.address);
     expect(await deployedQ2Token.owner()).to.equal(addr1.address);
   });
 
@@ -95,7 +96,7 @@ describe("Q2", function () {
 
     it('can send tokens to whitelisted address', async function () {
 
-      await deployedTransferController.addAddressToWhiteList(addr1.address, true);
+      await deployedTransferController.addOrChangeUserStatus(addr1.address, true);
       expect(await deployedQ2Token.balanceOf(addr1.address)).to.equal(0);
       expect(Number(await deployedQ2Token.balanceOf(owner.address)).toLocaleString('fullwide', { useGrouping: false })).to.equal(initialSupply.toString(10));
       await deployedQ2Token.transfer(addr1.address, "1000000000000000000");
@@ -164,7 +165,7 @@ describe("Q2", function () {
     });
 
     it('revert transaction if allowance is not provided', async function () {
-      await deployedTransferController.addAddressToWhiteList(addr1.address, true);
+      await deployedTransferController.addOrChangeUserStatus(addr1.address, true);
       await expect(
         deployedQ2Token.transferFrom(owner.address, addr1.address, 10000)
       ).to.be.revertedWith("transfer amount exceeds allowance");
@@ -186,7 +187,7 @@ describe("Q2", function () {
 
     it('can send tokens to whitelisted address and decreases allowance when everyone accept is off', async function () {
 
-      await deployedTransferController.addAddressToWhiteList(addr1.address, true);
+      await deployedTransferController.addOrChangeUserStatus(addr1.address, true);
       expect(await deployedQ2Token.balanceOf(addr1.address)).to.equal(0);
       expect(Number(await deployedQ2Token.balanceOf(owner.address)).toLocaleString('fullwide', { useGrouping: false })).to.equal(initialSupply.toString(10));
       expect(await deployedQ2Token.allowance(owner.address, addr1.address)).to.equal(0);

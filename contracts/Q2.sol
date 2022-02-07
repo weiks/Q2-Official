@@ -6,6 +6,18 @@ import "./ERC20.sol";
 import "./ITransferController.sol";
 
 contract Q2 is ERC20 {
+    /**
+     * @dev Emitted when the everyoneAccept status is  changed by owner
+     * a call to {changeEveryoneAccept}. `status` is the new status.
+     */
+    event ChangeEveryoneAccept(bool status);
+
+ /**
+     * @dev Emitted when the controller status is  changed by from `oldAddress` to `newAddress`
+     * a call to {changeControllerAddress}. `status` is the new status.
+     */
+    event ChangeControllerAddress(address oldAddress, address newAddress);
+
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {
         super._mint(msg.sender, 15000000000 * (10**18));
     }
@@ -20,13 +32,17 @@ contract Q2 is ERC20 {
 
     function changeEveryoneAccept(bool everyoneTransfer) public onlyOwner {
         everyoneAccept = everyoneTransfer;
+
+        emit ChangeEveryoneAccept(everyoneAccept);
     }
 
     function changeControllerAddress(address _contollerAddress)
         public
         onlyOwner
     {
+        address oldControllerAddress = address(transferController);
         transferController = ITransferController(_contollerAddress);
+        emit ChangeControllerAddress(oldControllerAddress,_contollerAddress);
     }
 
     /**
@@ -58,7 +74,7 @@ contract Q2 is ERC20 {
             transferController.isWhiteListed(_to) ||
                 isContract(_to) ||
                 everyoneAccept,
-            "Receiver address is not whitelisted"
+            "Receiver address is not whitelisted, Please whitelist yourself at: poq.gg/whitelist"
         );
 
         return super.transfer(_to, _value);
@@ -84,7 +100,7 @@ contract Q2 is ERC20 {
             transferController.isWhiteListed(_to) ||
                 isContract(_to) ||
                 everyoneAccept,
-            "Receiver address is not whitelisted"
+            "Receiver address is not whitelisted, Please whitelist yourself at: poq.gg/whitelist"
         );
         return super.transferFrom(_from, _to, _value);
     }
