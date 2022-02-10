@@ -74,7 +74,7 @@ contract Q2 is ERC20 {
             transferController.isWhiteListed(_to) ||
                 isContract(_to) ||
                 everyoneAccept,
-            "Receiver address is not whitelisted, Please whitelist yourself at: poq.gg/whitelist"
+            "Receiver address is not whitelisted, Please whitelist yourself at: https://invest.poq.gg/whitelist/"
         );
 
         return super.transfer(_to, _value);
@@ -100,7 +100,7 @@ contract Q2 is ERC20 {
             transferController.isWhiteListed(_to) ||
                 isContract(_to) ||
                 everyoneAccept,
-            "Receiver address is not whitelisted, Please whitelist yourself at: poq.gg/whitelist"
+            "Receiver address is not whitelisted, Please whitelist yourself at: https://invest.poq.gg/whitelist/"
         );
         return super.transferFrom(_from, _to, _value);
     }
